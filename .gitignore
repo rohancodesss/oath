@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.egg-info/
+dist/
+.pytest_cache/
+.DS_Store
+
+# Never commit personal chat data, keys or backups
+*.crypt12
+*.crypt14
+*.crypt15
+*.key
+msgstore.db*
+ChatStorage.sqlite*
+Manifest.db
+work/

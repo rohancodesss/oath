@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OATH — WhatsApp history, Android to iPhone</title>
+<meta name="description" content="Move your own WhatsApp chat history from Android to iPhone without Move to iOS and without paid software. Open source, validated end-to-end on a real device.">
+<style>
+  :root {
+    --bg: #faf8f4;
+    --panel: #ffffff;
+    --border: #e6e0d4;
+    --text: #221f1a;
+    --muted: #6b6356;
+    --accent: #2f6b4f;
+    --accent-bg: #e7f1ea;
+    --code-bg: #1d1a15;
+    --code-text: #eae5d9;
+    --badge-bg: #e7f1ea;
+    --badge-text: #2f6b4f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15130f;
+      --panel: #1c1912;
+      --border: #332e24;
+      --text: #ece6d8;
+      --muted: #9b927f;
+      --accent: #6fbf94;
+      --accent-bg: #203027;
+      --code-bg: #0e0c09;
+      --code-text: #e5dfce;
+      --badge-bg: #203027;
+      --badge-text: #7fd0a2;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+  }
+  a { color: var(--accent); }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+
+  header.hero { padding: 72px 0 48px; border-bottom: 1px solid var(--border); }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--badge-bg); color: var(--badge-text);
+    font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 999px;
+    margin-bottom: 18px;
+  }
+  .badge::before { content: "●"; font-size: 9px; }
+  h1 { font-size: clamp(32px, 6vw, 48px); margin: 0 0 14px; letter-spacing: -0.02em; }
+  .tagline { font-size: clamp(17px, 2.4vw, 20px); color: var(--muted); max-width: 560px; margin: 0 0 28px; }
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 15px;
+    text-decoration: none; border: 1px solid var(--border);
+  }
+  .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.secondary { background: var(--panel); color: var(--text); }
+  #stars { color: var(--muted); font-size: 14px; }
+
+  main { padding: 48px 0; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 24px; margin: 0 0 8px; }
+  .lede { color: var(--muted); margin: 0 0 24px; max-width: 620px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 16px; }
+  .card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+  pre {
+    background: var(--code-bg); color: var(--code-text);
+    padding: 20px; border-radius: 10px; overflow-x: auto;
+    font-size: 13.5px; line-height: 1.6;
+  }
+  code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .inline-code { background: var(--accent-bg); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+
+  .story {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px;
+  }
+  .story ol { margin: 12px 0 0; padding-left: 20px; color: var(--muted); font-size: 14.5px; }
+  .story li { margin-bottom: 8px; }
+  .story li b { color: var(--text); }
+
+  footer {
+    border-top: 1px solid var(--border); padding: 32px 0 60px;
+    color: var(--muted); font-size: 13px;
+  }
+  footer p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="badge">Validated end-to-end on a real device</div>
+    <h1>Your WhatsApp history. Android to iPhone. Without starting over.</h1>
+    <p class="tagline">OATH is an open-source tool that moves your real chat history, media, and stickers to a new iPhone — without Apple's "Move to iOS" (which doesn't carry WhatsApp) and without paid software.</p>
+    <div class="cta-row">
+      <a class="btn primary" href="https://github.com/rohancodesss/oath">View on GitHub</a>
+      <a class="btn secondary" href="#quickstart">Quickstart</a>
+      <span id="stars"></span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <section>
+      <h2>Why this exists</h2>
+      <p class="lede">
+        Apple's own migration tool doesn't move WhatsApp chat history between platforms. The
+        alternative is closed-source paid software of unknown reliability, run against your most
+        personal data. OATH decrypts your own export with your own key, runs entirely on your
+        machine, and sends nothing anywhere.
+      </p>
+      <div class="grid">
+        <div class="card">
+          <h3>Real data, real restore</h3>
+          <p>Converted a real crypt15 export — 1,622 chats, 64k+ messages, 11.5k+ media files — and restored it to a real iPhone via Apple's own MobileBackup2 protocol. No errors.</p>
+        </div>
+        <div class="card">
+          <h3>100% local</h3>
+          <p>No server, no account, no upload. Decryption key and chat data never leave your computer.</p>
+        </div>
+        <div class="card">
+          <h3>Open source, GPL-3.0</h3>
+          <p>Every byte of the conversion and restore logic is readable, forkable, and auditable — including the exact bugs found and fixed against a real device.</p>
+        </div>
+        <div class="card">
+          <h3>Search your own history</h3>
+          <p>Built-in full-text search over your decrypted chat history, from the CLI or a local-only web GUI. Nothing indexed ever leaves your machine either.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="quickstart">
+      <h2>Quickstart</h2>
+      <p class="lede">Needs Python 3.10+ and <a href="https://docs.astral.sh/uv/">uv</a>.</p>
+      <pre><code>uv sync
+uv run oath doctor                       # tool and device check
+uv run oath emulate /tmp/oath-demo       # try it on synthetic data first
+uv run oath convert --android /path/to/WhatsApp --key &lt;64-hex&gt; \
+    --ios-backup /path/to/unencrypted/backup --out /tmp/ios-converted
+uv run oath search-build --android /path/to/WhatsApp --key &lt;64-hex&gt; --out ~/wa-search.db
+uv run oath search-gui ~/wa-search.db    # http://127.0.0.1:8765, local only</code></pre>
+    </section>
+
+    <section>
+      <h2>Built on real-device evidence, not guesses</h2>
+      <p class="lede">
+        Apple's restore-time validator checks far more than file bytes. Getting a converted backup
+        to actually restore — not just build — took diagnosing two silent record-encoding bugs
+        against a real device, using its own live syslog to find what the restore protocol's own
+        error message didn't say.
+      </p>
+      <div class="story">
+        <ol>
+          <li><b>Digest encoded inline instead of as an object reference.</b> Round-trips fine through OATH's own reader; Apple's real <span class="inline-code">NSKeyedUnarchiver</span> rejects it outright during restore.</li>
+          <li><b>Missing <span class="inline-code">ProtectionClass</span> on written files.</b> Every real WhatsApp file carries class 3; without it the device fails to open the file with <span class="inline-code">EINVAL</span>.</li>
+          <li><b>Both fixed, both confirmed</b> on all 11,543 written files — the restore then completed to 100% with no errors.</li>
+        </ol>
+        <p style="margin: 16px 0 0;"><a href="https://github.com/rohancodesss/oath/blob/main/docs/RESEARCH.md">Read the full write-up →</a></p>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>OATH is independent and not affiliated with, authorized, sponsored, or endorsed by Meta Platforms, Inc. or WhatsApp LLC. WhatsApp is a registered trademark of Meta Platforms, Inc.</p>
+    <p>GPL-3.0-or-later. <a href="https://github.com/rohancodesss/oath">github.com/rohancodesss/oath</a></p>
+  </div>
+</footer>
+
+<script>
+fetch("https://api.github.com/repos/rohancodesss/oath")
+  .then(r => r.ok ? r.json() : null)
+  .then(d => {
+    if (d && typeof d.stargazers_count === "number") {
+      document.getElementById("stars").textContent = "★ " + d.stargazers_count + " on GitHub";
+    }
+  })
+  .catch(() => {});
+</script>
+
+</body>
+</html>

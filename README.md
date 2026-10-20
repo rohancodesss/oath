@@ -1,5 +1,7 @@
 # OATH
 
+![status](https://img.shields.io/badge/status-alpha-orange) ![license](https://img.shields.io/badge/license-GPL--3.0--or--later-blue) ![python](https://img.shields.io/badge/python-3.10%2B-blue)
+
 **OATH Allows Total History-transfer.** One tool to rule them all.
 
 An open-source terminal app for moving your own WhatsApp chat history between an Android phone and an iPhone, without paid software.

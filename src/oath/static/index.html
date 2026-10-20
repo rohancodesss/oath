@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WhatsApp Search</title>
+<style>
+  :root {
+    --bg: #f4f1ec;
+    --panel: #ffffff;
+    --border: #e3ddd3;
+    --text: #2b2724;
+    --muted: #8a8177;
+    --accent: #3f7a5c;
+    --accent-bg: #e9f3ec;
+    --bubble-me: #dcf0e3;
+    --bubble-them: #ffffff;
+    --mark: #ffe08a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1b1915;
+      --panel: #241f1a;
+      --border: #3a332b;
+      --text: #ece6dc;
+      --muted: #9c9388;
+      --accent: #6fbf94;
+      --accent-bg: #203027;
+      --bubble-me: #203027;
+      --bubble-them: #2c2621;
+      --mark: #5c4a1a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+  }
+  #sidebar {
+    width: 280px;
+    min-width: 200px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #sidebar h2 {
+    font-size: 15px;
+    padding: 16px 16px 8px;
+    margin: 0;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  #chatlist { overflow-y: auto; flex: 1; padding-bottom: 12px; }
+  .chat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+  }
+  .chat-row:hover { background: var(--accent-bg); }
+  .chat-row.active { background: var(--accent-bg); border-left-color: var(--accent); font-weight: 600; }
+  .chat-row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chat-row .count { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+
+  #main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  #topbar {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  #topbar input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+  }
+  #topbar input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  #chip {
+    font-size: 13px;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 6px 12px;
+    border-radius: 999px;
+    display: none;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  #chip.show { display: inline-flex; align-items: center; gap: 6px; }
+  #status { padding: 8px 24px; color: var(--muted); font-size: 13px; }
+  #results { flex: 1; overflow-y: auto; padding: 8px 24px 24px; }
+  .msg {
+    max-width: 640px;
+    margin: 8px 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--bubble-them);
+    border: 1px solid var(--border);
+  }
+  .msg.me { background: var(--bubble-me); margin-left: auto; }
+  .msg .meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    display: flex;
+    gap: 8px;
+  }
+  .msg .meta .sender { font-weight: 600; color: var(--accent); }
+  .msg .text { font-size: 14.5px; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
+  mark { background: var(--mark); color: inherit; border-radius: 2px; }
+  #empty { color: var(--muted); padding: 40px 24px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h2>Chats</h2>
+  <div id="chatlist"></div>
+</div>
+
+<div id="main">
+  <div id="topbar">
+    <input id="q" type="text" placeholder="Search your WhatsApp history…" autofocus>
+    <div id="chip"></div>
+  </div>
+  <div id="status"></div>
+  <div id="results"><div id="empty">Type something to search, or pick a chat on the left.</div></div>
+</div>
+
+<script>
+let activeChat = null;
+let debounceTimer = null;
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function highlight(text, query) {
+  const words = query.trim().split(/\s+/).filter(Boolean);
+  let html = escapeHtml(text);
+  for (const w of words) {
+    const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    html = html.replace(new RegExp(esc, "gi"), m => `<mark>${m}</mark>`);
+  }
+  return html;
+}
+
+async function loadChats() {
+  const res = await fetch("/api/chats");
+  const chats = await res.json();
+  const list = document.getElementById("chatlist");
+  list.innerHTML = "";
+  for (const c of chats) {
+    const row = document.createElement("div");
+    row.className = "chat-row";
+    row.innerHTML = `<span class="name">${escapeHtml(c.name || "(unknown)")}</span><span class="count">${c.count}</span>`;
+    row.onclick = () => selectChat(c.name, row);
+    list.appendChild(row);
+  }
+}
+
+function selectChat(name, rowEl) {
+  document.querySelectorAll(".chat-row").forEach(r => r.classList.remove("active"));
+  if (activeChat === name) {
+    activeChat = null;
+    updateChip();
+  } else {
+    activeChat = name;
+    rowEl.classList.add("active");
+    updateChip();
+  }
+  runSearch();
+}
+
+function updateChip() {
+  const chip = document.getElementById("chip");
+  if (activeChat) {
+    chip.textContent = activeChat + " ✕";
+    chip.className = "show";
+    chip.onclick = () => { activeChat = null; updateChip(); document.querySelectorAll(".chat-row").forEach(r => r.classList.remove("active")); runSearch(); };
+  } else {
+    chip.className = "";
+  }
+}
+
+async function runSearch() {
+  const q = document.getElementById("q").value.trim();
+  const status = document.getElementById("status");
+  const results = document.getElementById("results");
+
+  if (!q) {
+    results.innerHTML = '<div id="empty">Type something to search, or pick a chat on the left.</div>';
+    status.textContent = "";
+    return;
+  }
+
+  status.textContent = "searching…";
+  const params = new URLSearchParams({ q });
+  if (activeChat) params.set("chat", activeChat);
+  const res = await fetch("/api/search?" + params);
+  const rows = await res.json();
+
+  status.textContent = rows.length + " match" + (rows.length === 1 ? "" : "es");
+  if (!rows.length) {
+    results.innerHTML = '<div id="empty">No matches.</div>';
+    return;
+  }
+  results.innerHTML = rows.map(r => `
+    <div class="msg ${r.from_me ? 'me' : ''}">
+      <div class="meta"><span class="sender">${escapeHtml(r.from_me ? 'You' : r.sender)}</span><span>${r.chat}</span><span>${r.date}</span></div>
+      <div class="text">${highlight(r.text || "(no text)", q)}</div>
+    </div>
+  `).join("");
+}
+
+document.getElementById("q").addEventListener("input", () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(runSearch, 200);
+});
+
+loadChats();
+</script>
+</body>
+</html>

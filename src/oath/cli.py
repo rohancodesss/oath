@@ -85,6 +85,35 @@ def convert(args: argparse.Namespace) -> int:
     return 0 if result.ok else 1
 
 
+def search_build(args: argparse.Namespace) -> int:
+    from oath.android.reader import load_android
+    from oath.ios.backup import IOSBackup
+    from oath.ios.reader import load_ios
+    from oath.search import build_search_db
+
+    result = load_android(args.android, args.key) if args.android else load_ios(IOSBackup(args.ios_backup))
+    n = build_search_db(result, args.out)
+    print(f"indexed {n} messages across {len(result.chats)} chats into {args.out}")
+    return 0
+
+
+def search_query(args: argparse.Namespace) -> int:
+    from oath.search import search
+
+    hits = search(args.db, " ".join(args.query), chat=args.chat)
+    for h in hits:
+        print(f"[{h.date}] {h.chat} | {h.sender}: {h.text}")
+    print(f"\n{len(hits)} match(es)")
+    return 0
+
+
+def search_gui(args: argparse.Namespace) -> int:
+    from oath.gui import serve
+
+    serve(args.db, port=args.port)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="oath", description="OATH Allows Total History-transfer.")
     parser.add_argument("--version", action="version", version=f"oath {__version__}")
@@ -113,6 +142,22 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--out", type=Path, help="new backup directory (must not exist)")
     p.add_argument("--dry-run", action="store_true", help="read and report only")
 
+    p = sub.add_parser("search-build", help="build a local full-text search database from your chat history")
+    src = p.add_mutually_exclusive_group(required=True)
+    src.add_argument("--android", type=Path, help="the WhatsApp dir containing Databases/ and Media/")
+    src.add_argument("--ios-backup", type=Path, help="an unencrypted iPhone backup")
+    p.add_argument("--key", help="64-digit backup key (android only)")
+    p.add_argument("--out", type=Path, required=True, help="search database path to create")
+
+    p = sub.add_parser("search", help="full-text search a database built with search-build")
+    p.add_argument("db", type=Path)
+    p.add_argument("query", nargs="+")
+    p.add_argument("--chat", help="limit to one chat name")
+
+    p = sub.add_parser("search-gui", help="local-only web GUI over a search database")
+    p.add_argument("db", type=Path)
+    p.add_argument("--port", type=int, default=8765)
+
     args = parser.parse_args(argv)
 
     if args.command == "doctor":
@@ -133,6 +178,14 @@ def main(argv: list[str] | None = None) -> int:
         if not args.dry_run and args.out is None:
             parser.error("convert requires --out unless --dry-run is set")
         return convert(args)
+    if args.command == "search-build":
+        if args.android and not args.key:
+            parser.error("search-build --android requires --key")
+        return search_build(args)
+    if args.command == "search":
+        return search_query(args)
+    if args.command == "search-gui":
+        return search_gui(args)
 
     from oath.app import OathApp
 

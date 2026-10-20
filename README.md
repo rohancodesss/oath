@@ -11,6 +11,7 @@ An open-source terminal app for moving your own WhatsApp chat history between an
 - Decrypt a real-format crypt15 Android backup with your 64-digit key (via [wa-crypt-tools](https://github.com/ElDavoo/wa-crypt-tools)) and read chats, groups, media, quotes, stars and `@lid` senders.
 - Inject those chats into a **copy** of an unencrypted iPhone backup: Core Data keys and counters maintained, media added, `Manifest.db` sizes and digests kept consistent, safe to re-run.
 - Produce a backup that Apple's own restore mechanism (Finder / `pymobiledevice3 backup2 restore`) accepts and restores without corruption errors — confirmed on a real iPhone, real iOS 27.
+- Build a local full-text search database over your own chat history (either platform) and search it from the CLI or a local-only web GUI — see [Search](#search) below.
 - Not carried over yet: quoted-reply links and starred flags on iOS. Reported as warnings.
 - iPhone -> Android is not implemented yet.
 
@@ -43,6 +44,25 @@ uv run oath convert --android /tmp/oath-demo/android/WhatsApp --key <64-hex> \
 uv run oath          # launch the TUI (device check for now)
 uv run pytest        # run tests
 ```
+
+## Search
+
+Build a local SQLite FTS5 database from either platform's chat history, then search it from the
+terminal or a small local-only web GUI. Nothing leaves your machine — the GUI server binds to
+`127.0.0.1` only.
+
+```bash
+uv run oath search-build --android /tmp/oath-demo/android/WhatsApp --key <64-hex> --out ~/wa-search.db
+# or: uv run oath search-build --ios-backup /path/to/unencrypted/backup --out ~/wa-search.db
+
+uv run oath search ~/wa-search.db "some phrase"       # CLI, full-text
+uv run oath search ~/wa-search.db --chat "Name" hi     # scoped to one chat
+uv run oath search-gui ~/wa-search.db                  # opens http://127.0.0.1:8765
+```
+
+The search database is a plain SQLite file containing your decrypted message text — treat it
+like you would the backup itself. It's never written anywhere by default; `--out` is always
+explicit.
 
 ## Safety
 

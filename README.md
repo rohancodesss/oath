@@ -1,12 +1,12 @@
 # OATH
 
-![status](https://img.shields.io/badge/status-alpha-orange) ![license](https://img.shields.io/badge/license-GPL--3.0--or--later-blue) ![python](https://img.shields.io/badge/python-3.10%2B-blue)
+![status](https://img.shields.io/badge/status-abandoned-red) ![license](https://img.shields.io/badge/license-GPL--3.0--or--later-blue) ![python](https://img.shields.io/badge/python-3.10%2B-blue)
 
 **OATH Allows Total History-transfer.** One tool to rule them all.
 
 An open-source terminal app for moving your own WhatsApp chat history between an Android phone and an iPhone, without paid software.
 
-> **Status: alpha, validated on a real device end to end.** Android -> iPhone conversion has completed a full real-world run: a real crypt15 WhatsApp export (1622 chats, 64k+ messages, 11.5k+ media files) was converted, injected into a real iPhone's backup, and **successfully restored via Apple's own MobileBackup2 restore protocol** (`Restoring finished`, no errors). See [docs/RESEARCH.md](docs/RESEARCH.md) for the real-device findings, including two Manifest.db record-encoding bugs that silently fail Apple's restore validator and how they were diagnosed and fixed.
+> **Status: abandoned, archived, read-only.** This project is unmaintained and I'm not continuing it. It works -- Android -> iPhone conversion completed a full real-world run (a real crypt15 WhatsApp export, 1622 chats, 64k+ messages, 11.5k+ media files, converted, injected into a real iPhone's backup, and **successfully restored via Apple's own MobileBackup2 restore protocol**, `Restoring finished`, no errors) -- but handling real personal chat data and doing irreversible restores to real devices carries real risk, and I'm not maintaining it further. Everything here, including the real-device findings in [docs/RESEARCH.md](docs/RESEARCH.md) (two Manifest.db record-encoding bugs that silently fail Apple's restore validator, and how they were diagnosed and fixed), is free to fork and continue. No permission needed.
 
 ## What works today
 
